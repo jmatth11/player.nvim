@@ -1,6 +1,8 @@
 const std = @import("std");
 
 pub const c = @cImport({
+    @cDefine("MINIAUDIO_IMPLEMENTATION", 1);
+    @cInclude("miniaudio.h");
     @cInclude("luaconf.h");
     @cInclude("lua.h");
     @cInclude("lualib.h");
