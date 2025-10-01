@@ -19,6 +19,7 @@ pub fn build(b: *std.Build) void {
         .name = "player_nvim",
         .root_module = mod,
     });
+    lib.bundle_compiler_rt = true;
     lib.linkSystemLibrary("luajit-5.1");
     lib.linkSystemLibrary("m");
     lib.linkSystemLibrary("pthread");
