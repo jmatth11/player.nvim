@@ -27,6 +27,11 @@ export fn play(lua: ?*LuaState) c_int {
     return 1;
 }
 
+export fn deinit(_: ?*LuaState) c_int {
+    c.player_destroy(&player);
+    return 0;
+}
+
 export fn version(lua: ?*LuaState) c_int {
     // push string to be a return value
     c.lua_pushstring(lua, "0.0.1");
@@ -45,11 +50,12 @@ export fn lib_print(lua: ?*LuaState) c_int {
 /// Create a function register.
 const version_reg: FnReg = .{ .name = "version", .func = version };
 const lib_print_reg: FnReg = .{ .name = "lib_print", .func = lib_print };
-const play_reg: FnReg = .{.name = "play", .func = play };
+const play_reg: FnReg = .{ .name = "play", .func = play };
+const deinit_reg: FnReg = .{ .name = "deinit", .func = deinit };
 
 /// Complete list of functions to register.
 /// Use an empty struct to signal the end of the list.
-const lib_fn_reg = [_]FnReg{ version_reg, lib_print_reg, play_reg, FnReg{} };
+const lib_fn_reg = [_]FnReg{ version_reg, lib_print_reg, play_reg, deinit_reg, FnReg{} };
 
 /// This is a special function to register functions.
 /// Basically the entrypoint of the library.
