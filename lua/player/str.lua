@@ -16,7 +16,7 @@ M.path_sep = native_separator()
 -- @param item The item to join.
 -- @return The concatenated strings or nil if one/both were nil.
 function M.path_join(base, item)
-  if base ~= nil and item ~= item then
+  if base ~= nil and item ~= nil then
     return base .. M.path_sep .. item
   end
   return nil
