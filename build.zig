@@ -1,5 +1,30 @@
 const std = @import("std");
 
+fn build_audio_lib(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) *std.Build.Module {
+    const files: []const []const u8 = &.{
+        "audio/play.c",
+    };
+    const flags: []const []const u8 = &.{
+        "-Wall",
+        "-std=c11",
+    };
+    const audio_mod = b.createModule(.{
+        .target = target,
+        .optimize = optimize,
+        .pic = true,
+        .link_libc = true,
+    });
+    audio_mod.addIncludePath(b.path("./audio/"));
+    audio_mod.addCSourceFiles(.{
+        .files = files,
+        .language = .c,
+        .flags = flags,
+    });
+    audio_mod.linkSystemLibrary("m", .{ .needed = true });
+    audio_mod.linkSystemLibrary("pthread", .{ .needed = true });
+    audio_mod.linkSystemLibrary("atomic", .{ .needed = true });
+    return audio_mod;
+}
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
@@ -19,7 +44,14 @@ pub fn build(b: *std.Build) void {
         .name = "player_nvim",
         .root_module = mod,
     });
-    lib.bundle_compiler_rt = true;
+    // build and include audio lib
+    const audio_mod = build_audio_lib(b, target, optimize);
+    const audio_lib = b.addLibrary(.{
+        .name = "audio",
+        .root_module = audio_mod,
+    });
+    lib.addIncludePath(b.path("./audio/"));
+    lib.linkLibrary(audio_lib);
     lib.linkSystemLibrary("luajit-5.1");
     lib.linkSystemLibrary("m");
     lib.linkSystemLibrary("pthread");
