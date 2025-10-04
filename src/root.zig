@@ -13,6 +13,13 @@ const FnReg = c.luaL_Reg;
 
 var player: ?*c.player_t = null;
 
+export fn setup(_: ?*LuaState) c_int {
+    if (player == null) {
+        player = c.player_create();
+    }
+    return 0;
+}
+
 export fn play(lua: ?*LuaState) c_int {
     if (player == null) {
         player = c.player_create();
@@ -27,6 +34,17 @@ export fn play(lua: ?*LuaState) c_int {
     return 1;
 }
 
+export fn get_volume(lua: ?*LuaState) c_int {
+    const ret_val = c.player_get_volume(player);
+    c.lua_pushnumber(lua, @floatCast(ret_val));
+    return 1;
+}
+export fn set_volume(lua: ?*LuaState) c_int {
+    const new_vol = c.lua_tonumber(lua, 1);
+    c.player_set_volume(player, @floatCast(new_vol));
+    return 0;
+}
+
 export fn deinit(_: ?*LuaState) c_int {
     c.player_destroy(&player);
     return 0;
@@ -39,23 +57,25 @@ export fn version(lua: ?*LuaState) c_int {
     return 1;
 }
 
-export fn lib_print(lua: ?*LuaState) c_int {
-    // it's important to have [*c] type.
-    // also to pull argument passed in from lua, you use index position.
-    const arg: [*c]const u8 = c.lua_tolstring(lua, 1, null);
-    std.debug.print("from zig: {s}\n", .{arg});
-    return 0;
-}
-
 /// Create a function register.
 const version_reg: FnReg = .{ .name = "version", .func = version };
-const lib_print_reg: FnReg = .{ .name = "lib_print", .func = lib_print };
 const play_reg: FnReg = .{ .name = "play", .func = play };
 const deinit_reg: FnReg = .{ .name = "deinit", .func = deinit };
+const setup_reg: FnReg = .{ .name = "setup", .func = setup };
+const get_vol_reg: FnReg = .{ .name = "get_volume", .func = get_volume };
+const set_vol_reg: FnReg = .{ .name = "set_volume", .func = set_volume };
 
 /// Complete list of functions to register.
 /// Use an empty struct to signal the end of the list.
-const lib_fn_reg = [_]FnReg{ version_reg, lib_print_reg, play_reg, deinit_reg, FnReg{} };
+const lib_fn_reg = [_]FnReg{
+    version_reg,
+    setup_reg,
+    play_reg,
+    deinit_reg,
+    get_vol_reg,
+    set_vol_reg,
+    FnReg{},
+};
 
 /// This is a special function to register functions.
 /// Basically the entrypoint of the library.

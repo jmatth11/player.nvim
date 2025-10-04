@@ -27,9 +27,12 @@ local player_autogroup = "player.nvim.autogroup"
 -- @param opts Table of options.
 --      parent_dir - The parent directory to look for the song files.
 function M.setup(opts)
+  print(opts.parent_dir)
   if opts ~= nil and type(opts) == "table" then
-    M.opts = vim.tbl_deep_extend('keep', M.opts, opts)
+    print(opts.parent_dir)
+    M.opts = vim.tbl_deep_extend('force', M.opts, opts)
   end
+  print(M.opts.parent_dir)
   vim.api.nvim_create_augroup(player_autogroup, { clear = true })
   vim.api.nvim_create_autocmd("VimLeavePre", {
     group = player_autogroup,
@@ -37,6 +40,7 @@ function M.setup(opts)
       M.kill()
     end
   })
+  player.setup()
 end
 
 -- Print the version of the plugin.
@@ -55,6 +59,16 @@ function M.play(name)
     local msg = "playing: " .. file_name
     utils.info(msg)
     player.play(file_name)
+  end
+end
+
+function M.get_volume()
+  return player.get_volume()
+end
+
+function M.set_volume(vol)
+  if vol ~= nil then
+    player.set_volume(vol)
   end
 end
 

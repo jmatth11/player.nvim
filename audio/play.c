@@ -61,6 +61,26 @@ bool player_play(struct player_t *p, const char *file_name) {
   return true;
 }
 
+float player_get_volume(struct player_t *p) {
+  float out = 0.0;
+  if (!p->is_playing) {
+    return out;
+  }
+  ma_result result = ma_device_get_master_volume(&p->device, &out);
+  if (result != MA_SUCCESS) {
+    fprintf(stderr, "failed to get master volume for device: code(%d).\n", result);
+    return 0.0;
+  }
+  return out;
+}
+
+void player_set_volume(struct player_t *p, float volume) {
+  ma_result result = ma_device_set_master_volume(&p->device, volume);
+  if (result != MA_SUCCESS) {
+    fprintf(stderr, "failed to set master volume for device: code(%d).\n", result);
+  }
+}
+
 void player_destroy(struct player_t **p) {
   if (p == NULL) {
     return;
