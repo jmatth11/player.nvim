@@ -7,7 +7,15 @@ struct player_t {
   ma_device device;
   ma_decoder decoder;
   ma_device_config config;
+  bool configured;
 };
+
+static void unconfigure(struct player_t *p) {
+    ma_device_uninit(&p->device);
+    ma_decoder_uninit(&p->decoder);
+    p->is_playing = false;
+    p->configured = false;
+}
 
 static void data_callback(ma_device* pDevice, void *pOutput, const void* pInput, ma_uint32 frameCount) {
   (void)pInput;
@@ -24,14 +32,13 @@ struct player_t * player_create() {
     return NULL;
   }
   result->is_playing = false;
+  result->configured = false;
   return result;
 }
 
 bool player_play(struct player_t *p, const char *file_name) {
   if (p->is_playing) {
-    ma_device_uninit(&p->device);
-    ma_decoder_uninit(&p->decoder);
-    p->is_playing = false;
+    unconfigure(p);
   }
   ma_result result = ma_decoder_init_file(file_name, NULL, &p->decoder);
   if (result != MA_SUCCESS) {
@@ -53,11 +60,11 @@ bool player_play(struct player_t *p, const char *file_name) {
   result = ma_device_start(&p->device);
   if (result != MA_SUCCESS) {
     fprintf(stderr, "failed to start device: code(%d)\n", result);
-    ma_device_uninit(&p->device);
-    ma_decoder_uninit(&p->decoder);
+    unconfigure(p);
     return false;
   }
   p->is_playing = true;
+  p->configured = true;
   return true;
 }
 
@@ -88,8 +95,9 @@ void player_destroy(struct player_t **p) {
   if ((*p) == NULL) {
     return;
   }
-  ma_device_uninit(&(*p)->device);
-  ma_decoder_uninit(&(*p)->decoder);
+  if ((*p)->configured) {
+    unconfigure(*p);
+  }
   free(*p);
   *p = NULL;
 }

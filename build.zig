@@ -29,15 +29,15 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
     const mod = b.addModule("player_nvim", .{
-        .root_source_file = b.path("src/root.zig"),
+        .root_source_file = b.path("src/ffi.zig"),
         .target = target,
         .optimize = optimize,
         .pic = true,
         .link_libc = true,
     });
-    mod.addIncludePath(.{
-        .cwd_relative = "/usr/include/luajit-2.1",
-    });
+    //mod.addIncludePath(.{
+    //    .cwd_relative = "/usr/include/luajit-2.1",
+    //});
     mod.addIncludePath(b.path("./audio/"));
     const lib = b.addLibrary(.{
         .linkage = .dynamic,
@@ -52,7 +52,7 @@ pub fn build(b: *std.Build) void {
     });
     lib.addIncludePath(b.path("./audio/"));
     lib.linkLibrary(audio_lib);
-    lib.linkSystemLibrary("luajit-5.1");
+    //lib.linkSystemLibrary("luajit-5.1");
     lib.linkSystemLibrary("m");
     lib.linkSystemLibrary("pthread");
     lib.linkSystemLibrary("atomic");

@@ -1,18 +1,5 @@
 local utils = require("player.utils")
-
--- for luajit 2.1.0
--- load in zig audio library
-local dirname = string.sub(debug.getinfo(1).source, 2, string.len('/init.lua') * -1)
-local library_path = dirname .. '../../zig-out/lib/lib?.so'
-package.cpath = package.cpath .. ';' .. library_path
-local ok, player = pcall(require, 'player_nvim')
-if not ok then
-  utils.error("player.nvim zig library could not be loaded.")
-  return {}
-end
-
--- init
-
+local player = require("player.player")
 local str = require("player.str");
 local M = {
   opts = {
@@ -27,12 +14,9 @@ local player_autogroup = "player.nvim.autogroup"
 -- @param opts Table of options.
 --      parent_dir - The parent directory to look for the song files.
 function M.setup(opts)
-  print(opts.parent_dir)
   if opts ~= nil and type(opts) == "table" then
-    print(opts.parent_dir)
     M.opts = vim.tbl_deep_extend('force', M.opts, opts)
   end
-  print(M.opts.parent_dir)
   vim.api.nvim_create_augroup(player_autogroup, { clear = true })
   vim.api.nvim_create_autocmd("VimLeavePre", {
     group = player_autogroup,
@@ -67,7 +51,7 @@ function M.get_volume()
 end
 
 function M.set_volume(vol)
-  if vol ~= nil then
+  if vol ~= nil and vol >= 0 and vol <= 1 then
     player.set_volume(vol)
   end
 end
