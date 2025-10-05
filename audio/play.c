@@ -40,31 +40,45 @@ bool player_play(struct player_t *p, const char *file_name) {
   if (p->is_playing) {
     unconfigure(p);
   }
-  ma_result result = ma_decoder_init_file(file_name, NULL, &p->decoder);
-  if (result != MA_SUCCESS) {
-    fprintf(stderr, "failed to init decoder file: code(%d)\n", result);
-    return false;
+  if (!p->is_playing && p->configured) {
+    ma_result result = ma_decoder_init_file(file_name, NULL, &p->decoder);
+    if (result != MA_SUCCESS) {
+      fprintf(stderr, "failed to init decoder file: code(%d)\n", result);
+      return false;
+    }
+    p->config = ma_device_config_init(ma_device_type_playback);
+    p->config.playback.format = p->decoder.outputFormat;
+    p->config.playback.channels = p->decoder.outputChannels;
+    p->config.sampleRate        = p->decoder.outputSampleRate;
+    p->config.dataCallback      = data_callback;
+    p->config.pUserData         = &p->decoder;
+    result = ma_device_init(NULL, &p->config, &p->device);
+    if (result != MA_SUCCESS) {
+      fprintf(stderr, "failed to init device: code(%d)\n", result);
+      ma_decoder_uninit(&p->decoder);
+      return false;
+    }
   }
-  p->config = ma_device_config_init(ma_device_type_playback);
-  p->config.playback.format = p->decoder.outputFormat;
-  p->config.playback.channels = p->decoder.outputChannels;
-  p->config.sampleRate        = p->decoder.outputSampleRate;
-  p->config.dataCallback      = data_callback;
-  p->config.pUserData         = &p->decoder;
-  result = ma_device_init(NULL, &p->config, &p->device);
-  if (result != MA_SUCCESS) {
-    fprintf(stderr, "failed to init device: code(%d)\n", result);
-    ma_decoder_uninit(&p->decoder);
-    return false;
-  }
-  result = ma_device_start(&p->device);
-  if (result != MA_SUCCESS) {
-    fprintf(stderr, "failed to start device: code(%d)\n", result);
+  ma_result start_result = ma_device_start(&p->device);
+  if (start_result != MA_SUCCESS) {
+    fprintf(stderr, "failed to start device: code(%d)\n", start_result);
     unconfigure(p);
     return false;
   }
   p->is_playing = true;
   p->configured = true;
+  return true;
+}
+
+bool player_pause(struct player_t *p) {
+  if (p->is_playing) {
+    ma_result result = ma_device_stop(&p->device);
+    if (result != MA_SUCCESS) {
+      fprintf(stderr, "failed to stop device. code(%d)\n", result);
+      return false;
+    }
+    p->is_playing = false;
+  }
   return true;
 }
 

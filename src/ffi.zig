@@ -23,11 +23,27 @@ export fn play(file_name: [*:0]const u8) c_int {
     return 1;
 }
 
+export fn pause() c_int {
+    if (player) |p| {
+        if (!c.player_pause(p)) {
+            return 0;
+        }
+    } else {
+        return 0;
+    }
+    return 1;
+}
+
 export fn get_volume() f32 {
-    return c.player_get_volume(player);
+    if (player) |p| {
+        return c.player_get_volume(p);
+    }
+    return 0.0;
 }
 export fn set_volume(vol: f32) void {
-    c.player_set_volume(player, @floatCast(vol));
+    if (player) |p| {
+        c.player_set_volume(p, @floatCast(vol));
+    }
 }
 
 export fn deinit() void {

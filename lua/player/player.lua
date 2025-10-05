@@ -3,6 +3,7 @@ local ffi = require("ffi")
 ffi.cdef [[
 void setup();
 int play(const char* file_name);
+int pause();
 float get_volume();
 void set_volume(float vol);
 void deinit();
