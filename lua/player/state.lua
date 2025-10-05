@@ -9,11 +9,15 @@ local M = {
   }
 }
 
+-- Initial setup of the player.
 function M.setup(opts)
   M.opts = opts
   player.setup()
 end
 
+-- Get the version of the library.
+--
+-- @param silent Flag to not print the version, just to return it.
 function M.version(silent)
   local v = "v" .. player.version()
   if silent == nil then
@@ -40,6 +44,8 @@ function M.volume(vol)
   end
 end
 
+-- Set the song name.
+-- If param is nil, return the song name.
 function M.song(name)
   if name ~= nil then
     local file_name = str.path_join(M.opts.parent_dir, name)
@@ -51,6 +57,7 @@ function M.song(name)
   end
 end
 
+-- Play the given song.
 function M.play(name)
   M.song(name)
   if M._song ~= nil then
@@ -62,12 +69,14 @@ function M.play(name)
   end
 end
 
+-- Pause the player.
 function M.pause()
   if player.pause() == 0 then
     utils.error("failed to pause song.")
   end
 end
 
+-- Kill the player.
 function M.kill()
   player.deinit()
 end

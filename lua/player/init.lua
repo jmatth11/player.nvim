@@ -43,6 +43,10 @@ function M.set_volume(vol)
   state.volume(vol)
 end
 
+function M.pause()
+  state.pause()
+end
+
 -- Kill the current player process.
 function M.kill()
   state.kill()
