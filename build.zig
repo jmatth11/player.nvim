@@ -35,9 +35,6 @@ pub fn build(b: *std.Build) void {
         .pic = true,
         .link_libc = true,
     });
-    //mod.addIncludePath(.{
-    //    .cwd_relative = "/usr/include/luajit-2.1",
-    //});
     mod.addIncludePath(b.path("./audio/"));
     const lib = b.addLibrary(.{
         .linkage = .dynamic,
@@ -49,12 +46,23 @@ pub fn build(b: *std.Build) void {
     const audio_lib = b.addLibrary(.{
         .name = "audio",
         .root_module = audio_mod,
+        .linkage = .static
     });
     lib.addIncludePath(b.path("./audio/"));
     lib.linkLibrary(audio_lib);
-    //lib.linkSystemLibrary("luajit-5.1");
-    lib.linkSystemLibrary("m");
-    lib.linkSystemLibrary("pthread");
-    lib.linkSystemLibrary("atomic");
     b.installArtifact(lib);
+
+    const exe_mod = b.createModule(.{
+        .target = target,
+        .optimize = optimize,
+        .root_source_file = b.path("src/main.zig"),
+    });
+    exe_mod.linkLibrary(audio_lib);
+
+    const exe = b.addExecutable(.{
+        .name = "player",
+        .root_module = exe_mod,
+    });
+    exe.linkLibC();
+    b.installArtifact(exe);
 }

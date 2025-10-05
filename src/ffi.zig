@@ -23,13 +23,23 @@ export fn play(file_name: [*:0]const u8) c_int {
     return 1;
 }
 
-export fn pause() c_int {
+export fn pause() void {
     if (player) |p| {
-        if (!c.player_pause(p)) {
+        c.player_pause(p);
+    }
+}
+
+export fn @"resume"() void {
+    if (player) |p| {
+        c.player_resume(p);
+    }
+}
+
+export fn stop() c_int {
+    if (player) |p| {
+        if (!c.player_stop(p)) {
             return 0;
         }
-    } else {
-        return 0;
     }
     return 1;
 }
@@ -56,4 +66,3 @@ export fn version() [*:0]const u8 {
     // push string to be a return value
     return "0.0.1";
 }
-

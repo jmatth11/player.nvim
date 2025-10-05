@@ -71,9 +71,16 @@ end
 
 -- Pause the player.
 function M.pause()
-  if player.pause() == 0 then
-    utils.error("failed to pause song.")
-  end
+  player.pause()
+end
+
+-- Resume the player.
+function M.resume()
+  player.resume()
+end
+
+function M.stop()
+  player.stop()
 end
 
 -- Kill the player.

@@ -19,10 +19,12 @@ static void unconfigure(struct player_t *p) {
 
 static void data_callback(ma_device* pDevice, void *pOutput, const void* pInput, ma_uint32 frameCount) {
   (void)pInput;
-  ma_decoder* pDecoder = (ma_decoder*)pDevice->pUserData;
-  ma_result result = ma_decoder_read_pcm_frames(pDecoder, pOutput, frameCount, NULL);
-  if (result != MA_SUCCESS) {
-    fprintf(stderr, "ma_decoder_read_pcm_frames failed with code: (%d)\n", result);
+  struct player_t* player = (struct player_t*)pDevice->pUserData;
+  if (player->is_playing) {
+    ma_result result = ma_decoder_read_pcm_frames(&player->decoder, pOutput, frameCount, NULL);
+    if (result != MA_SUCCESS) {
+      fprintf(stderr, "ma_decoder_read_pcm_frames failed with code: (%d)\n", result);
+    }
   }
 }
 
@@ -37,27 +39,26 @@ struct player_t * player_create() {
 }
 
 bool player_play(struct player_t *p, const char *file_name) {
-  if (p->is_playing) {
+  if (p == NULL) return false;
+  if (p->configured) {
     unconfigure(p);
   }
-  if (!p->is_playing && p->configured) {
-    ma_result result = ma_decoder_init_file(file_name, NULL, &p->decoder);
-    if (result != MA_SUCCESS) {
-      fprintf(stderr, "failed to init decoder file: code(%d)\n", result);
-      return false;
-    }
-    p->config = ma_device_config_init(ma_device_type_playback);
-    p->config.playback.format = p->decoder.outputFormat;
-    p->config.playback.channels = p->decoder.outputChannels;
-    p->config.sampleRate        = p->decoder.outputSampleRate;
-    p->config.dataCallback      = data_callback;
-    p->config.pUserData         = &p->decoder;
-    result = ma_device_init(NULL, &p->config, &p->device);
-    if (result != MA_SUCCESS) {
-      fprintf(stderr, "failed to init device: code(%d)\n", result);
-      ma_decoder_uninit(&p->decoder);
-      return false;
-    }
+  ma_result result = ma_decoder_init_file(file_name, NULL, &p->decoder);
+  if (result != MA_SUCCESS) {
+    fprintf(stderr, "failed to init decoder file: code(%d)\n", result);
+    return false;
+  }
+  p->config = ma_device_config_init(ma_device_type_playback);
+  p->config.playback.format = p->decoder.outputFormat;
+  p->config.playback.channels = p->decoder.outputChannels;
+  p->config.sampleRate        = p->decoder.outputSampleRate;
+  p->config.dataCallback      = data_callback;
+  p->config.pUserData         = p;
+  result = ma_device_init(NULL, &p->config, &p->device);
+  if (result != MA_SUCCESS) {
+    fprintf(stderr, "failed to init device: code(%d)\n", result);
+    ma_decoder_uninit(&p->decoder);
+    return false;
   }
   ma_result start_result = ma_device_start(&p->device);
   if (start_result != MA_SUCCESS) {
@@ -70,21 +71,27 @@ bool player_play(struct player_t *p, const char *file_name) {
   return true;
 }
 
-bool player_pause(struct player_t *p) {
-  if (p->is_playing) {
-    ma_result result = ma_device_stop(&p->device);
-    if (result != MA_SUCCESS) {
-      fprintf(stderr, "failed to stop device. code(%d)\n", result);
-      return false;
-    }
-    p->is_playing = false;
+void player_pause(struct player_t *p) {
+  if (p == NULL) return;
+  p->is_playing = false;
+}
+void player_resume(struct player_t *p) {
+  if (p == NULL) return;
+  p->is_playing = true;
+}
+bool player_stop(struct player_t *p) {
+  if (p == NULL) return false;
+  ma_result result = ma_device_stop(&p->device);
+  if (result != MA_SUCCESS) {
+    fprintf(stderr, "failed to stop device. code(%d)\n", result);
+    return false;
   }
   return true;
 }
 
 float player_get_volume(struct player_t *p) {
   float out = 0.0;
-  if (!p->is_playing) {
+  if (p == NULL || !p->is_playing) {
     return out;
   }
   ma_result result = ma_device_get_master_volume(&p->device, &out);
@@ -96,6 +103,7 @@ float player_get_volume(struct player_t *p) {
 }
 
 void player_set_volume(struct player_t *p, float volume) {
+  if (p == NULL) return;
   ma_result result = ma_device_set_master_volume(&p->device, volume);
   if (result != MA_SUCCESS) {
     fprintf(stderr, "failed to set master volume for device: code(%d).\n", result);

@@ -34,10 +34,17 @@ void player_set_volume(struct player_t *p, float volume);
 
 /**
  * Pause the player.
- *
- * @return True on success, false otherwise.
  */
-bool player_pause(struct player_t *p);
+void player_pause(struct player_t *p);
+/**
+ * Resume the player.
+ */
+void player_resume(struct player_t *p);
+
+/**
+ * Stop the player.
+ */
+bool player_stop(struct player_t *p);
 
 /**
  * Destroy the player.

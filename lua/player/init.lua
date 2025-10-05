@@ -47,6 +47,14 @@ function M.pause()
   state.pause()
 end
 
+function M.resume()
+  state.resume()
+end
+
+function M.stop()
+  state.stop()
+end
+
 -- Kill the current player process.
 function M.kill()
   state.kill()
