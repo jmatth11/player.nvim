@@ -23,8 +23,9 @@ function M.setup(opts)
       M.kill()
     end
   })
-  if state.setup(M.opts) == 0 then
-    utils.error("player setup failed.")
+  local result = state.setup(M.opts)
+  if result ~= 0 then
+    utils.error("player setup failed: code(" .. result .. ")")
   end
 end
 

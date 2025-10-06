@@ -48,7 +48,7 @@ pub export fn has_stopped() c_int {
     if (player) |p| {
         return @intFromBool(c.player_has_stopped(p));
     }
-    return 1;
+    return 0;
 }
 
 pub export fn get_volume() f32 {

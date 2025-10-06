@@ -2,6 +2,8 @@ local player = require("player.player")
 local utils = require("player.utils")
 local str = require("player.str");
 
+local dirname = string.sub(debug.getinfo(1).source, 2, string.len('/state.lua') * -1)
+
 local M = {
   _song = nil,
   _volume = 100,
@@ -13,7 +15,7 @@ local M = {
 -- Initial setup of the player.
 function M.setup(opts)
   M.opts = opts
-  return player.setup()
+  return player.setup(dirname)
 end
 
 -- Get the version of the library.
@@ -65,7 +67,7 @@ function M.play(name)
   if M._song ~= nil then
     local msg = "playing: " .. M._song
     utils.info(msg)
-    if player.play(M._song) == 0 then
+    if player.play(M._song) ~= 0 then
       utils.error("failed to play song")
     end
   end

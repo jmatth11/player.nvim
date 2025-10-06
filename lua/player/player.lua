@@ -1,8 +1,8 @@
 local ffi = require("ffi")
 
 ffi.cdef [[
-int setup();
-int play(const char* file_name);
+int setup(const char *root_dir);
+int play(const char *file_name);
 void set_volume(float vol);
 void pause();
 void resume();

@@ -1,3 +1,4 @@
+const std = @import("std");
 pub const shm_name: [*:0]const u8 = "/jmatth11.player.nvim.player_exe.shm";
 pub const sem_name: [*:0]const u8 = "/jmatth11.player.nvim.player_exe.sem";
 pub const RDWR: comptime_int = 0o2;
@@ -8,5 +9,6 @@ pub const SharedMem = struct {
     volume: f32,
     is_playing: bool,
     should_stop: bool,
+    sem_lock: *std.c.sem_t,
 };
 
