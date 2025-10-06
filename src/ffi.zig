@@ -6,13 +6,13 @@ pub const c = @cImport({
 
 var player: ?*c.player_t = null;
 
-export fn setup() void {
+pub export fn setup() void {
     if (player == null) {
         player = c.player_create();
     }
 }
 
-export fn play(file_name: [*:0]const u8) c_int {
+pub export fn play(file_name: [*:0]const u8) c_int {
     if (player == null) {
         player = c.player_create();
     }
@@ -23,19 +23,19 @@ export fn play(file_name: [*:0]const u8) c_int {
     return 1;
 }
 
-export fn pause() void {
+pub export fn pause() void {
     if (player) |p| {
         c.player_pause(p);
     }
 }
 
-export fn @"resume"() void {
+pub export fn @"resume"() void {
     if (player) |p| {
         c.player_resume(p);
     }
 }
 
-export fn stop() c_int {
+pub export fn stop() c_int {
     if (player) |p| {
         if (!c.player_stop(p)) {
             return 0;
@@ -44,25 +44,32 @@ export fn stop() c_int {
     return 1;
 }
 
-export fn get_volume() f32 {
+pub export fn has_stopped() c_int {
+    if (player) |p| {
+        return @intFromBool(c.player_has_stopped(p));
+    }
+    return 1;
+}
+
+pub export fn get_volume() f32 {
     if (player) |p| {
         return c.player_get_volume(p);
     }
     return 0.0;
 }
-export fn set_volume(vol: f32) void {
+pub export fn set_volume(vol: f32) void {
     if (player) |p| {
         c.player_set_volume(p, @floatCast(vol));
     }
 }
 
-export fn deinit() void {
+pub export fn deinit() void {
     if (player != null) {
         c.player_destroy(&player);
     }
 }
 
-export fn version() [*:0]const u8 {
+pub export fn version() [*:0]const u8 {
     // push string to be a return value
     return "0.0.1";
 }

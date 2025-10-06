@@ -1,15 +1,13 @@
 local ffi = require("ffi")
 
 ffi.cdef [[
-void setup();
+int setup();
 int play(const char* file_name);
+void set_volume(float vol);
 void pause();
 void resume();
-int stop();
-float get_volume();
-void set_volume(float vol);
+void stop();
 void deinit();
-const char* version();
 ]]
 
 local dirname = string.sub(debug.getinfo(1).source, 2, string.len('/player.lua') * -1)

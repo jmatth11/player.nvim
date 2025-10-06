@@ -4,6 +4,7 @@ local str = require("player.str");
 
 local M = {
   _song = nil,
+  _volume = 100,
   opts = {
     parent_dir = vim.env.HOME,
   }
@@ -12,14 +13,14 @@ local M = {
 -- Initial setup of the player.
 function M.setup(opts)
   M.opts = opts
-  player.setup()
+  return player.setup()
 end
 
 -- Get the version of the library.
 --
 -- @param silent Flag to not print the version, just to return it.
 function M.version(silent)
-  local v = "v" .. player.version()
+  local v = "v0.0.1"
   if silent == nil then
     utils.info(v)
   end
@@ -38,9 +39,10 @@ function M.volume(vol)
     elseif vol < 0 then
       vol = 0
     end
+    M._volume = vol
     player.set_volume(vol / 100)
   else
-    return player.get_volume()
+    return M._volume
   end
 end
 

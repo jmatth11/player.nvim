@@ -28,7 +28,7 @@ fn build_audio_lib(b: *std.Build, target: std.Build.ResolvedTarget, optimize: st
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
-    const mod = b.addModule("player_nvim", .{
+    const mod = b.addModule("player", .{
         .root_source_file = b.path("src/ffi.zig"),
         .target = target,
         .optimize = optimize,
@@ -38,7 +38,7 @@ pub fn build(b: *std.Build) void {
     mod.addIncludePath(b.path("./audio/"));
     const lib = b.addLibrary(.{
         .linkage = .dynamic,
-        .name = "player_nvim",
+        .name = "player",
         .root_module = mod,
     });
     // build and include audio lib
@@ -52,15 +52,33 @@ pub fn build(b: *std.Build) void {
     lib.linkLibrary(audio_lib);
     b.installArtifact(lib);
 
+    const lua_mod = b.addModule("player_nvim", .{
+        .root_source_file = b.path("src/lua.zig"),
+        .target = target,
+        .optimize = optimize,
+        .pic = true,
+        .link_libc = true,
+    });
+    lua_mod.addIncludePath(b.path("./audio/"));
+    const lua_lib = b.addLibrary(.{
+        .linkage = .dynamic,
+        .name = "player_nvim",
+        .root_module = lua_mod,
+    });
+    lua_lib.addIncludePath(b.path("./audio/"));
+    lua_lib.linkLibrary(audio_lib);
+    b.installArtifact(lua_lib);
+
     const exe_mod = b.createModule(.{
         .target = target,
         .optimize = optimize,
         .root_source_file = b.path("src/main.zig"),
     });
     exe_mod.linkLibrary(audio_lib);
+    exe_mod.addIncludePath(b.path("./audio/"));
 
     const exe = b.addExecutable(.{
-        .name = "player",
+        .name = "player_cli",
         .root_module = exe_mod,
     });
     exe.linkLibC();

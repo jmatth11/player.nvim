@@ -89,6 +89,14 @@ bool player_stop(struct player_t *p) {
   return true;
 }
 
+bool player_has_stopped(struct player_t *p) {
+  if (p == NULL) {
+    return true;
+  }
+  ma_device_state state = ma_device_get_state(&p->device);
+  return state == ma_device_state_stopped;
+}
+
 float player_get_volume(struct player_t *p) {
   float out = 0.0;
   if (p == NULL || !p->is_playing) {
