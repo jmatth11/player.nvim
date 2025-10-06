@@ -86,6 +86,8 @@ pub fn main() !void {
     while (player.has_stopped() != 1) {
         // block until controller sends an update.
         if (sem_lock) |sl| {
+            // TODO rework ffi.zig to allow for a notify function which can call std.c.sem_post
+            // to allow this to unblock if we've encountered an AT_END error.
             const wait_res: c_int = std.c.sem_wait(sl);
             if (wait_res != 0) {
                 log_to_file("failed to sem_wait: {any}\n", .{std.posix.errno(-1)});

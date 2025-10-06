@@ -4,6 +4,7 @@
 
 struct player_t {
   bool is_playing;
+  bool has_ended;
   ma_device device;
   ma_decoder decoder;
   ma_device_config config;
@@ -23,7 +24,11 @@ static void data_callback(ma_device* pDevice, void *pOutput, const void* pInput,
   if (player->is_playing) {
     ma_result result = ma_decoder_read_pcm_frames(&player->decoder, pOutput, frameCount, NULL);
     if (result != MA_SUCCESS) {
-      fprintf(stderr, "ma_decoder_read_pcm_frames failed with code: (%d)\n", result);
+      if (result != MA_AT_END) {
+        fprintf(stderr, "ma_decoder_read_pcm_frames failed with code: (%d)\n", result);
+      }
+      player->has_ended = true;
+      player->is_playing = false;
     }
   }
 }
@@ -34,6 +39,7 @@ struct player_t * player_create() {
     return NULL;
   }
   result->is_playing = false;
+  result->has_ended = false;
   result->configured = false;
   return result;
 }
@@ -68,6 +74,7 @@ bool player_play(struct player_t *p, const char *file_name) {
   }
   p->is_playing = true;
   p->configured = true;
+  p->has_ended = true;
   return true;
 }
 
@@ -94,7 +101,7 @@ bool player_has_stopped(struct player_t *p) {
     return true;
   }
   ma_device_state state = ma_device_get_state(&p->device);
-  return state == ma_device_state_stopped;
+  return state == ma_device_state_stopped || p->has_ended;
 }
 
 float player_get_volume(struct player_t *p) {
