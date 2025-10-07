@@ -1,13 +1,15 @@
 #include "play.h"
 #define MINIAUDIO_IMPLEMENTATION 1
 #include "miniaudio.h"
+#include <stdint.h>
 
 struct player_t {
-  bool is_playing;
-  bool has_ended;
+  playback_end cb;
   ma_device device;
   ma_decoder decoder;
   ma_device_config config;
+  bool is_playing;
+  bool has_ended;
   bool configured;
 };
 
@@ -29,11 +31,14 @@ static void data_callback(ma_device* pDevice, void *pOutput, const void* pInput,
       }
       player->has_ended = true;
       player->is_playing = false;
+      if (player->cb != NULL) {
+        player->cb();
+      }
     }
   }
 }
 
-struct player_t * player_create() {
+struct player_t * player_create(playback_end cb) {
   struct player_t *result = malloc(sizeof(struct player_t));
   if (result == NULL) {
     return NULL;
@@ -41,6 +46,7 @@ struct player_t * player_create() {
   result->is_playing = false;
   result->has_ended = false;
   result->configured = false;
+  result->cb = cb;
   return result;
 }
 
@@ -123,6 +129,23 @@ void player_set_volume(struct player_t *p, float volume) {
   if (result != MA_SUCCESS) {
     fprintf(stderr, "failed to set master volume for device: code(%d).\n", result);
   }
+}
+
+bool player_get_length(struct player_t *p, uint64_t *length) {
+  if (p == NULL) return false;
+  if (!p->configured) return false;
+  ma_uint64 totalFrames = 0;
+  ma_result result = ma_decoder_get_length_in_pcm_frames(&p->decoder, &totalFrames);
+  if (result != MA_SUCCESS) {
+    return false;
+  }
+  ma_uint32 sample_rate = p->decoder.outputSampleRate;
+  if (sample_rate == 0) {
+    fprintf(stderr, "player_get_length: sample rate was 0.\n");
+    return false;
+  }
+  *length = (double)totalFrames/(double)sample_rate;
+  return true;
 }
 
 void player_destroy(struct player_t **p) {

@@ -10,6 +10,16 @@ const Error = error {
 
 const alloc = std.heap.smp_allocator;
 var log_file: ?std.fs.File = null;
+var sem_lock: ?*std.c.sem_t = null;
+
+export fn playback_end() void {
+    if (sem_lock) |sl| {
+        const result: c_int = std.c.sem_post(sl);
+        if (result != 0) {
+            log_to_file("playback_cli: sem_post on playback end failed: code({})\n", .{std.posix.errno(-1)});
+        }
+    }
+}
 
 fn log_to_file(comptime fmt: []const u8, args: anytype) void {
     if (log_file) |lf| {
@@ -41,7 +51,7 @@ pub fn main() !void {
     // get our shared memory file descriptor
     const shm_fd = std.c.shm_open(
         common.shm_name,
-        common.RDWR, // read only
+        common.RDWR | common.CREAT,
         std.c.S.IRUSR | std.c.S.IWUSR,
     );
     const mapping: std.c.MAP = .{
@@ -64,9 +74,17 @@ pub fn main() !void {
         .volume = mem.volume,
         .should_stop = mem.should_stop,
         .sem_lock = mem.sem_lock,
+        .length = 0,
     };
+    // acquire the shared semaphore
+    sem_lock = std.c.sem_open(common.sem_name, 0, 0, 0);
+    if (sem_lock == null) {
+        log_to_file("sem_open failed: code({})\n", .{std.posix.errno(-1)});
+        return  Error.sem_open_failed;
+    }
+    defer _ = std.c.sem_close(sem_lock.?);
     // setup player
-    player.setup();
+    player.setup(playback_end);
     defer player.deinit();
     // play the song.
     if (player.play(file_name.?) == 0) {
@@ -75,14 +93,10 @@ pub fn main() !void {
     }
     // set the volume to whatever is set.
     player.set_volume(local_mem.volume);
+    // set audio length.
+    mem.length = player.get_audio_length();
+    local_mem.length = mem.length;
 
-    // acquire the shared semaphore
-    const sem_lock: ?*std.c.sem_t = std.c.sem_open(common.sem_name, 0, 0, 0);
-    if (sem_lock == null) {
-        log_to_file("sem_open failed: code({})\n", .{std.posix.errno(-1)});
-        return  Error.sem_open_failed;
-    }
-    defer _ = std.c.sem_close(sem_lock.?);
     while (player.has_stopped() != 1) {
         // block until controller sends an update.
         if (sem_lock) |sl| {

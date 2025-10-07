@@ -2,6 +2,7 @@
 #define PLAYER_NVIM_PLAY_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 /**
  * Opaque player structure.
@@ -9,9 +10,17 @@
 struct player_t;
 
 /**
- * Create a player.
+ * Callback function typedef for when playback ends.
  */
-struct player_t * player_create();
+typedef void(*playback_end)();
+
+/**
+ * Create a player.
+ *
+ * @param cb Callback for when playback has ended.
+ * @return Newly allocated player.
+ */
+struct player_t * player_create(playback_end cb);
 
 /**
  * Play the given song file.
@@ -50,6 +59,15 @@ bool player_stop(struct player_t *p);
  * Flag for if the player has stopped.
  */
 bool player_has_stopped(struct player_t *p);
+
+/**
+ * Get the running length of the current song.
+ *
+ * @param p The player structure.
+ * @param length The length param to populate with the audio length.
+ * @return True on success, False otherwise.
+ */
+bool player_get_length(struct player_t *p, uint64_t *length);
 
 /**
  * Destroy the player.

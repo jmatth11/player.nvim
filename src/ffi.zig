@@ -3,18 +3,19 @@ const std = @import("std");
 pub const c = @cImport({
     @cInclude("play.h");
 });
+pub const playback_end = *const fn() callconv(.c) void;
 
 var player: ?*c.player_t = null;
 
-pub export fn setup() void {
+pub export fn setup(cb: playback_end) void {
     if (player == null) {
-        player = c.player_create();
+        player = c.player_create(@ptrCast(cb));
     }
 }
 
 pub export fn play(file_name: [*:0]const u8) c_int {
     if (player == null) {
-        player = c.player_create();
+        return 0;
     }
     if (!c.player_play(player, file_name)) {
         std.debug.print("failed to play file", .{});
@@ -56,6 +57,16 @@ pub export fn get_volume() f32 {
         return c.player_get_volume(p);
     }
     return 0.0;
+}
+pub export fn get_audio_length() u64 {
+    if (player) |p| {
+        var length: u64 = 0;
+        if (!c.player_get_length(p, &length)) {
+            return 0;
+        }
+        return length;
+    }
+    return 0;
 }
 pub export fn set_volume(vol: f32) void {
     if (player) |p| {

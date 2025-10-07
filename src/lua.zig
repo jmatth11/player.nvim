@@ -37,6 +37,7 @@ export fn setup(root_dir: [*:0]const u8) c_int {
         return -1;
     };
     state.log_file_name = log_file;
+    // TODO test switching to openFile variant so we don't overwrite the file everytime
     state.log_file = std.fs.createFileAbsolute(log_file, .{
         .truncate = false,
     }) catch |err| {
@@ -88,6 +89,7 @@ export fn setup(root_dir: [*:0]const u8) c_int {
         log_to_file("sem_open failed. code({})\n", .{std.posix.errno(-1)});
         return -6;
     }
+    mem.length = 0;
     mem.is_playing = false;
     mem.should_stop = false;
     mem.volume = 0.75;
@@ -163,6 +165,15 @@ export fn stop() void {
             _ = std.c.sem_post(sem_lock);
         }
     }
+}
+export fn get_audio_length() u64 {
+    if (state.proc == null) {
+        return 0;
+    }
+    if (state.mem) |mem| {
+        return mem.length;
+    }
+    return 0;
 }
 
 export fn deinit() void {
