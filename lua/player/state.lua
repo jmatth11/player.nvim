@@ -76,7 +76,7 @@ end
 
 -- Get the audio length in seconds.
 function M.audio_length()
-  return player.get_audio_length()
+  return tonumber(player.get_audio_length())
 end
 
 function M.is_playing()
@@ -87,10 +87,9 @@ function M.in_progress()
   return player.in_progress()
 end
 
-function M.started()
-  -- TODO this is actually a terrible approach.
-  -- need to rework to grab current position from the player itself.
-  return M._started
+-- Get the current playtime in seconds.
+function M.get_playtime()
+  return tonumber(player.get_playtime())
 end
 
 function M.get_player_info()
@@ -100,7 +99,7 @@ function M.get_player_info()
   return {
     song = M.song(),
     volume = M.volume(),
-    current_spot = M.started(),
+    playtime = M.get_playtime(),
     audio_length = M.audio_length(),
     is_playing = M.is_playing(),
   }

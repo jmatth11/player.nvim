@@ -4,10 +4,10 @@ local M = {}
 
 local tracker_win_id = nil
 local tracker_bufnr = nil
+local width = 60
+local height = 4
 
 local function create_window()
-  local width = 60
-  local height = 10
   local border_chars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
   local bufnr = vim.api.nvim_create_buf(false, false)
   local win_id, win = popup.create(bufnr, {
@@ -43,34 +43,6 @@ local function create_window()
     bufnr = bufnr,
     win_id = win_id
   }
-end
-
-function M.format_time_info(result, info)
-  local yr = math.floor(info.yr)
-  local week = math.floor(info.week)
-  local day = math.floor(info.day)
-  local hr = math.floor(info.hr)
-  local min = math.floor(info.min)
-  local sec = math.floor(info.sec)
-  if yr > 0 then
-    table.insert(result, string.format("\tyr: %d", yr))
-  end
-  if week > 0 then
-    table.insert(result, string.format("\tweek: %d", week % 52))
-  end
-  if day > 0 then
-    table.insert(result, string.format("\tday: %d", day % 7))
-  end
-  if hr > 0 then
-    table.insert(result, string.format("\thr: %d", hr % 24))
-  end
-  if min > 0 then
-    table.insert(result, string.format("\tmin: %d", min % 60))
-  end
-  if sec > 0 then
-    table.insert(result, string.format("\tsec: %d", sec % 60))
-  end
-  return result
 end
 
 -- Safe gaurd against divide by zero
@@ -128,7 +100,7 @@ function M.progress_bar(percent)
     buf = buf .. mark
     index = index + 1
   end
-  buf = buf .. string.format(" %f%%", range)
+  buf = buf .. string.format(" %d%%", 100 * percent)
   return buf
 end
 
@@ -138,19 +110,23 @@ end
 
 function M.format_contents(info)
   local contents = {}
+  local empty = " "
+  local text = "--- No Song Selected ---"
   if info == nil then
-    table.insert(contents, "--- No Song Selected ---")
+    local offset = (width / 2.0) - (string.len(text) / 2)
+    table.insert(contents, "")
+    table.insert(contents, string.rep(empty, offset) .. text)
     return contents
   end
   -- TODO get song name from full-path song name.
-  table.insert(contents, string.format("Song: %s", M.get_file_name(info.song)))
+  table.insert(contents, string.format("Song:   %s", M.get_file_name(info.song)))
   table.insert(contents, string.format("Volume: %d", info.volume))
   -- TODO need to format the time properly
-  local run_time = M.extract_time_info(info.current_spot)
-  table.insert(contents, string.format("Time: %d:%d:%d", run_time.hr, run_time.min, run_time.sec))
+  local run_time = M.extract_time_info(info.playtime)
+  table.insert(contents, string.format("Time:   %d:%d:%d", run_time.hr, run_time.min, run_time.sec))
   local percent_played = 0
   if info.audio_length > 0 then
-    percent_played = run_time / info.audio_length
+    percent_played = info.playtime / info.audio_length
   end
   table.insert(contents, M.progress_bar(percent_played))
   return contents

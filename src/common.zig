@@ -7,6 +7,7 @@ pub const EXECL: comptime_int = 0o200;
 
 pub const SharedMem = struct {
     sem_lock: *std.c.sem_t,
+    playtime: u64,
     length: u64,
     volume: f32,
     is_playing: bool,

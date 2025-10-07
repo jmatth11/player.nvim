@@ -12,7 +12,7 @@ struct player_t;
 /**
  * Callback function typedef for when playback ends.
  */
-typedef void(*playback_end)();
+typedef void(*playback_cb)(uint64_t frameCount, bool ended);
 
 /**
  * Create a player.
@@ -20,7 +20,7 @@ typedef void(*playback_end)();
  * @param cb Callback for when playback has ended.
  * @return Newly allocated player.
  */
-struct player_t * player_create(playback_end cb);
+struct player_t * player_create(playback_cb cb);
 
 /**
  * Play the given song file.
@@ -61,10 +61,19 @@ bool player_stop(struct player_t *p);
 bool player_has_stopped(struct player_t *p);
 
 /**
- * Get the running length of the current song.
+ * Get the current playtime in seconds.
  *
  * @param p The player structure.
- * @param length The length param to populate with the audio length.
+ * @param playtime The current playtime in seconds.
+ * @return True on success, false otherwise.
+ */
+bool player_get_current_playtime(struct player_t *p, uint64_t *playtime);
+
+/**
+ * Get the running length (in seconds) of the current song.
+ *
+ * @param p The player structure.
+ * @param length The total length of the audio in seconds.
  * @return True on success, False otherwise.
  */
 bool player_get_length(struct player_t *p, uint64_t *length);

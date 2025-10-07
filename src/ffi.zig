@@ -3,11 +3,11 @@ const std = @import("std");
 pub const c = @cImport({
     @cInclude("play.h");
 });
-pub const playback_end = *const fn() callconv(.c) void;
+pub const playback_cb = *const fn(frameCount: u64, ended: bool) callconv(.c) void;
 
 var player: ?*c.player_t = null;
 
-pub export fn setup(cb: playback_end) void {
+pub export fn setup(cb: playback_cb) void {
     if (player == null) {
         player = c.player_create(@ptrCast(cb));
     }
@@ -57,6 +57,16 @@ pub export fn get_volume() f32 {
         return c.player_get_volume(p);
     }
     return 0.0;
+}
+pub export fn get_current_playtime() u64 {
+    if (player) |p| {
+        var playtime: u64 = 0;
+        if (!c.player_get_current_playtime(p, &playtime)) {
+            return 0;
+        }
+        return playtime;
+    }
+    return 0;
 }
 pub export fn get_audio_length() u64 {
     if (player) |p| {

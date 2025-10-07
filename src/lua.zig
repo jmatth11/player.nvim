@@ -93,6 +93,7 @@ export fn setup(root_dir: [*:0]const u8) c_int {
     mem.is_playing = false;
     mem.should_stop = false;
     mem.volume = 0.75;
+    mem.playtime = 0;
     state.mem = mem;
     state.shm_fd = shm_fd;
     state.sem_lock = sem_lock;
@@ -165,6 +166,15 @@ export fn stop() void {
             _ = std.c.sem_post(sem_lock);
         }
     }
+}
+export fn get_playtime() u64 {
+    if (state.proc == null) {
+        return 0;
+    }
+    if (state.mem) |mem| {
+        return mem.playtime;
+    }
+    return 0;
 }
 export fn get_audio_length() u64 {
     if (state.proc == null) {

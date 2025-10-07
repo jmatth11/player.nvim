@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 struct player_t {
-  playback_end cb;
+  playback_cb cb;
   ma_device device;
   ma_decoder decoder;
   ma_device_config config;
@@ -31,14 +31,15 @@ static void data_callback(ma_device* pDevice, void *pOutput, const void* pInput,
       }
       player->has_ended = true;
       player->is_playing = false;
+    } else {
       if (player->cb != NULL) {
-        player->cb();
+        player->cb(frameCount, player->has_ended);
       }
     }
   }
 }
 
-struct player_t * player_create(playback_end cb) {
+struct player_t * player_create(playback_cb cb) {
   struct player_t *result = malloc(sizeof(struct player_t));
   if (result == NULL) {
     return NULL;
@@ -129,6 +130,23 @@ void player_set_volume(struct player_t *p, float volume) {
   if (result != MA_SUCCESS) {
     fprintf(stderr, "failed to set master volume for device: code(%d).\n", result);
   }
+}
+
+bool player_get_current_playtime(struct player_t *p, uint64_t *playtime) {
+  if (p == NULL) return false;
+  if (!p->configured) return false;
+  ma_uint64 currentFrame = 0;
+  ma_result result = ma_decoder_get_cursor_in_pcm_frames(&p->decoder, &currentFrame);
+  if (result != MA_SUCCESS) {
+    return false;
+  }
+  ma_uint32 sampleRate = p->decoder.outputSampleRate;
+  if (sampleRate == 0) {
+    fprintf(stderr, "player_get_length: sample rate was 0.\n");
+    return false;
+  }
+  *playtime = (double)currentFrame/(double)sampleRate;
+  return true;
 }
 
 bool player_get_length(struct player_t *p, uint64_t *length) {
