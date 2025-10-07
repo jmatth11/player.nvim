@@ -175,6 +175,26 @@ export fn get_audio_length() u64 {
     }
     return 0;
 }
+export fn is_playing() c_int {
+    if (state.proc == null) {
+        return 0;
+    }
+    if (state.mem) |mem| {
+        return @intFromBool(mem.is_playing);
+    }
+    return 0;
+}
+export fn in_progress() c_int {
+    if (state.proc == null) {
+        return 0;
+    }
+    // sending 0 to id with kill just checks to see if the process exists
+    // and we have permission to kill it. We don't need to worry about permissions
+    if (std.c.kill(state.proc.?.id, 0) == 0) {
+        return 1;
+    }
+    return 0;
+}
 
 export fn deinit() void {
     alloc.free(state.log_file_name);

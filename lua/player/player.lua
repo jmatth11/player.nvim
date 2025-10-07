@@ -3,7 +3,10 @@ local ffi = require("ffi")
 ffi.cdef [[
 int setup(const char *root_dir);
 int play(const char *file_name);
+int is_playing();
+int in_progress();
 void set_volume(float vol);
+long int get_audio_length();
 void pause();
 void resume();
 void stop();

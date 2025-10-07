@@ -1,5 +1,6 @@
 local state = require("player.state")
 local utils = require("player.utils")
+local ui = require("player.ui")
 local M = {
   opts = {
     parent_dir = vim.env.HOME
@@ -27,6 +28,10 @@ function M.setup(opts)
   if result ~= 0 then
     utils.error("player setup failed: code(" .. result .. ")")
   end
+end
+
+function M.player_info()
+  ui.toggle_window(state.get_player_info())
 end
 
 -- Print the version of the plugin.

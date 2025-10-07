@@ -7,6 +7,7 @@ local dirname = string.sub(debug.getinfo(1).source, 2, string.len('/state.lua') 
 local M = {
   _song = nil,
   _volume = 100,
+  _started = nil,
   opts = {
     parent_dir = vim.env.HOME,
   }
@@ -71,6 +72,38 @@ function M.play(name)
       utils.error("failed to play song")
     end
   end
+end
+
+-- Get the audio length in seconds.
+function M.audio_length()
+  return player.get_audio_length()
+end
+
+function M.is_playing()
+  return player.is_playing()
+end
+
+function M.in_progress()
+  return player.in_progress()
+end
+
+function M.started()
+  -- TODO this is actually a terrible approach.
+  -- need to rework to grab current position from the player itself.
+  return M._started
+end
+
+function M.get_player_info()
+  if M.in_progress() == 0 then
+    return nil
+  end
+  return {
+    song = M.song(),
+    volume = M.volume(),
+    current_spot = M.started(),
+    audio_length = M.audio_length(),
+    is_playing = M.is_playing(),
+  }
 end
 
 -- Pause the player.
