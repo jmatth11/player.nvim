@@ -3,14 +3,17 @@ local popup = require("plenary.popup")
 local M = {}
 
 -- Create a window
-function M.create_window(title, namespace, width, height)
+function M.create_window(title, namespace, width, height, padding)
+  if padding == nil then
+    padding = 5
+  end
   local border_chars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
   local bufnr = vim.api.nvim_create_buf(false, false)
   local win_id, win = popup.create(bufnr, {
     title = title,
     hightlight = namespace,
-    line = vim.o.lines - height - 5,
-    col = vim.o.columns - width - 5,
+    line = vim.o.lines - height - padding,
+    col = vim.o.columns - width - padding,
     minwidth = width,
     minheight = height,
     borderchars = border_chars,

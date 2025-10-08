@@ -73,7 +73,7 @@ function M.toggle_window(opts)
     tracker_bufnr = nil
     return
   end
-  local window = ui.create_window("File Select", "player_file_viewer.nvim.window", width, height)
+  local window = ui.create_window("File Select", "player_file_viewer.nvim.window", width, height, 1)
   local contents = M.format_contents(opts.parent_dir, opts.recursive)
   if contents == nil then
     contents = {}
