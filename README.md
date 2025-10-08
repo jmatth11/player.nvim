@@ -27,6 +27,9 @@ Setup options:
 
 ## Usage
 
+The plugin is configured to kill the player automatically when you exit neovim.
+So there is no need to call it yourself.
+
 ### Recommended Mappings
 
 ```lua
@@ -72,7 +75,11 @@ require('player').volume_down()
 
 ## Screenshots
 
+![player info window](references/player-info.png "Player Info Window")
+
 ## Demo
+
+!! TODO add demo when file selection is implemented. !!
 
 ## Known issues
 
