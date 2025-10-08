@@ -6,6 +6,7 @@ local M = {
   opts = {
     parent_dir = vim.env.HOME,
     volume_scale = 5,
+    live_update = true,
   }
 }
 
@@ -35,7 +36,7 @@ end
 
 -- Toggle the player info window.
 function M.player_info()
-  ui.toggle_window(state.get_player_info())
+  ui.toggle_window(state)
 end
 
 -- Print the version of the plugin.

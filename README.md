@@ -31,6 +31,9 @@ Setup options:
   -- The scale at which the volume increments and decrements.
   -- default is 5
   volume_scale = 5,
+  -- Flag to redraw the player info window every second when it's open.
+  -- Default is true.
+  live_update = true,
 }
 ```
 

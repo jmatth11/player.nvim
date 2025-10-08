@@ -61,4 +61,27 @@ function M.get_basename(file_path)
   return string.match(file_path, "[^/\\%s]+$")
 end
 
+-- Check if a given string has a certain ending.
+function M.ends_with(str, ending)
+  return ending == "" or str:sub(-#ending) == ending
+end
+
+-- Check for audio file endings we support.
+local function file_endings(val)
+  return M.ends_with(val, ".mp3") or M.ends_with(val, ".wav") or M.ends_with(val, ".flac")
+end
+
+-- Get the list of audio files in a directory.
+function M.get_files(dir)
+  local files = vim.fn.readdir(dir)
+  local result = {}
+  if files then
+    for _, file in ipairs(files) do
+      if file_endings(file) then
+        table.insert(result, file)
+      end
+    end
+  end
+end
+
 return M

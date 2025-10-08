@@ -9,6 +9,20 @@ local tracker_bufnr = nil
 local width = 60
 local height = 5
 
+-- live update.
+-- 1 second
+local timer_delay = 1000
+
+local function timer_fn(state)
+  return function ()
+    if tracker_bufnr == nil then
+      return
+    end
+    M.draw_player(state.get_player_info())
+    vim.defer_fn(timer_fn(state), timer_delay)
+  end
+end
+
 -- Create a window
 local function create_window()
   local border_chars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
@@ -202,15 +216,9 @@ end
 
 -- Toggle the player info window on or off.
 --
--- @param info The table of info to display. Expects the format:
---    {
---      song: String         - The song name.
---      volume: Number       - The volume of the player.
---      is_playing: Number   - The playing state. 1 for true, 0 for false.
---      playtime: Number     - The current playtime.
---      audio_length: Number - The full length of the audio.
---    }
-function M.toggle_window(info)
+-- @param state The player state object.
+-- @param live_update Flag to redraw the player info every second.
+function M.toggle_window(state, live_update)
   if tracker_win_id ~= nil then
     vim.api.nvim_win_close(tracker_win_id, true)
     tracker_win_id = nil
@@ -218,7 +226,7 @@ function M.toggle_window(info)
     return
   end
   local window = create_window()
-  local contents = M.format_contents(info)
+  local contents = M.format_contents(state.get_player_info())
   if contents == nil then
     contents = {}
   end
@@ -265,6 +273,9 @@ function M.toggle_window(info)
     true,
     { buf = tracker_bufnr }
   )
+  if live_update then
+    vim.defer_fn(timer_fn(state), timer_delay)
+  end
 end
 
 return M
