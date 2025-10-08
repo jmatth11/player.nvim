@@ -24,6 +24,7 @@ Setup options:
   -- default is 5
   volume_scale = 5,
 }
+```
 
 ## Usage
 

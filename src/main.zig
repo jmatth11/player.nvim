@@ -99,7 +99,6 @@ pub fn main() !void {
             .is_playing = m.is_playing,
             .volume = m.volume,
             .should_stop = m.should_stop,
-            .sem_lock = m.sem_lock,
             .length = 0,
             .playtime = 0,
         };
