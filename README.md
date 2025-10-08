@@ -110,10 +110,9 @@ require('player').file_select()
 
 ## Screenshots
 
-!! TODO update screenshot with new layout. !!
 ![player info window](references/player-info.png "Player Info Window")
 
-!! TODO add screenshot of file selection. !!
+![file selection window](references/file-selection.png "File Selection Window")
 
 ## Demo
 
