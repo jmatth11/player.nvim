@@ -1,11 +1,5 @@
+local str = require("player.str")
 local M = {}
-
--- Linux sleep function.
---
--- @param seconds Number of seconds to sleep.
-function M.sleep_linux(seconds)
-  os.execute("sleep " .. tonumber(seconds))
-end
 
 -- Log and notify the given message at INFO level.
 function M.info(msg)
@@ -72,11 +66,31 @@ local function file_endings(val)
 end
 
 -- Get the list of audio files in a directory.
-function M.get_files(dir)
+--
+-- @param dir The directory to search for audio files.
+-- @param recursive Flag to search recursively.
+-- @param prev_path This should always be null from the caller. This is for internal state.
+-- @return List of audio files within a directory.
+function M.get_files(dir, recursive, prev_path)
   local files = vim.fn.readdir(dir)
   local result = {}
   if files then
     for _, file in ipairs(files) do
+      -- recursive path
+      if recursive and vim.fn.isdirectory(file) then
+        local full_path = str.path_join(dir, file)
+        if prev_path ~= nil then
+          full_path = str.path_join(prev_path, file)
+        end
+        -- add all inner files to list
+        local inner_files = M.get_files(file, recursive, full_path)
+        for _, entry in ipairs(inner_files) do
+          -- TODO maybe consider categorizing inner files to better group songs?
+          if file_endings(entry) then
+            table.insert(result, entry)
+          end
+        end
+      end
       if file_endings(file) then
         table.insert(result, file)
       end

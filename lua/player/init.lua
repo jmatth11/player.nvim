@@ -9,6 +9,7 @@ local M = {
     parent_dir = vim.env.HOME,
     volume_scale = 5,
     live_update = true,
+    recursive = false,
   },
   is_setup = false
 }
@@ -42,7 +43,7 @@ end
 function M.player_info()
   -- TODO maybe put the close logic in the toggle functions themselves
   file_ui.close()
-  info_ui.toggle_window(state)
+  info_ui.toggle_window(state, M.opts.live_update)
 end
 
 function M.file_select()

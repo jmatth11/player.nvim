@@ -2,6 +2,7 @@ local ui = require("player.ui")
 local utils = require("player.utils")
 
 local M = {
+  -- file select options
   options = nil
 }
 
@@ -11,6 +12,7 @@ local tracker_bufnr = nil
 local width = 50
 local height = 40
 
+-- Grab the selected file and play the song.
 function M.select_file()
   local idx = vim.fn.line(".")
   if M.options ~= nil then
@@ -19,10 +21,12 @@ function M.select_file()
   end
 end
 
-function M.format_contents(dir)
+-- Format the list of audio files.
+function M.format_contents(dir, recursive)
   M.options = {}
   local content = {}
-  local files = utils.get_files(dir)
+  -- TODO maybe categorize songs in nice format?
+  local files = utils.get_files(dir, recursive)
 
   local files_len = #files
   local error_text = "--- No Audio Files Found ---"
@@ -53,6 +57,7 @@ function M.close()
   end
 end
 
+-- TODO Maybe add search feature in case of a lot of songs?
 -- Toggle the player file select window on or off.
 function M.toggle_window(opts)
   if tracker_win_id ~= nil then
@@ -62,7 +67,7 @@ function M.toggle_window(opts)
     return
   end
   local window = ui.create_window("File Select", "player_file_viewer.nvim.window", width, height)
-  local contents = M.format_contents(opts.parent_dir)
+  local contents = M.format_contents(opts.parent_dir, opts.recursive)
   if contents == nil then
     contents = {}
   end

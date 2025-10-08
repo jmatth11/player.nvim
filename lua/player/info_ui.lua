@@ -6,7 +6,7 @@ local M = {}
 -- window specifics
 local tracker_win_id = nil
 local tracker_bufnr = nil
-local width = 60
+local width = 65
 local height = 4
 
 -- live update.
