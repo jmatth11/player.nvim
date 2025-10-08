@@ -124,19 +124,17 @@ export fn setup(root_dir: [*:0]const u8) c_int {
 /// @param file_name The audio filename.
 /// @return 0 for success, Less than 0 for failure.
 export fn play(file_name: [*:0]const u8) c_int {
-    if (state.proc) |*proc| {
+    if (state.proc != null) {
         stop();
-        _ = proc.*.kill() catch |err| {
-            log_to_file("failed to kill proc: {any}.\n", .{err});
-        };
+        state.proc = null;
     }
     const args: []const []const u8 = &.{
         state.exe_path,
         std.mem.span(file_name),
         state.log_file_name,
     };
-    log_to_file("exe({s}); song({s})\n", .{ args[0], args[1] });
     state.mem.?.is_playing = true;
+    state.mem.?.should_stop = false;
     state.proc = std.process.Child.init(args, alloc);
     state.proc.?.spawn() catch |err| {
         log_to_file("spawn failed: {any}\n", .{err});
@@ -197,6 +195,11 @@ export fn stop() void {
         mem.should_stop = true;
         if (state.sem_lock) |sem_lock| {
             _ = std.c.sem_post(sem_lock);
+        }
+        if (state.proc) |*proc| {
+            _ = proc.*.wait() catch |err| {
+                log_to_file("failed to wait proc: {any}.\n", .{err});
+            };
         }
     }
 }
