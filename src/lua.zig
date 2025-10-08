@@ -3,16 +3,25 @@ const common = @import("common.zig");
 
 const alloc = std.heap.smp_allocator;
 
+/// State object of the plugin.
 const State = struct {
+    /// The semaphore.
     sem_lock: ?*std.c.sem_t,
+    /// The shared memory file descriptor.
     shm_fd: ?c_int,
+    /// The shared memory.
     mem: ?*common.SharedMem,
+    /// The child process of the player.
     proc: ?std.process.Child,
+    /// The player_cli executable path.
     exe_path: []const u8,
+    /// The Log File.
     log_file: std.fs.File,
+    /// The log file path name.
     log_file_name: []const u8,
 };
 
+/// The plugin state instance.
 var state: State = .{
     .sem_lock = null,
     .shm_fd = null,
@@ -23,14 +32,20 @@ var state: State = .{
     .log_file_name = undefined,
 };
 
+/// Convenience function to log a message to a file.
 fn log_to_file(comptime fmt: []const u8, args: anytype) void {
     const buf = std.fmt.allocPrint(alloc, fmt, args) catch unreachable;
     _ = state.log_file.write(buf) catch unreachable;
 }
 
+/// Setup the player plugin.
+///
+/// @param root_dir The root directory of the plugin.
+/// @return 0 for success, Less than 0 for any error.
 export fn setup(root_dir: [*:0]const u8) c_int {
+    const root: []const u8 = std.mem.span(root_dir);
     const log_file = std.fs.path.join(alloc, &.{
-        std.mem.span(root_dir),
+        root,
         "../../player.log",
     }) catch |err| {
         std.log.err("failed to join path for executable. {any}\n", .{err});
@@ -45,7 +60,7 @@ export fn setup(root_dir: [*:0]const u8) c_int {
         return -2;
     };
     const exe = std.fs.path.join(alloc, &.{
-        std.mem.span(root_dir),
+        root,
         "../../zig-out/bin/player_cli",
     }) catch |err| {
         log_to_file("failed to create exe path: {any}", .{err});
@@ -70,7 +85,7 @@ export fn setup(root_dir: [*:0]const u8) c_int {
         .TYPE = .SHARED,
     };
     // grab the shared memory
-    const mem_op: *anyopaque = std.c.mmap(
+    const mem_op: ?*anyopaque = std.c.mmap(
         null,
         @sizeOf(common.SharedMem),
         std.c.PROT.READ | std.c.PROT.WRITE,
@@ -78,7 +93,11 @@ export fn setup(root_dir: [*:0]const u8) c_int {
         shm_fd,
         0,
     );
-    var mem: *common.SharedMem = @ptrCast(@alignCast(mem_op));
+    if (mem_op == null) {
+        log_to_file("shared memory was null.\n", .{});
+        return -6;
+    }
+    var mem: *common.SharedMem = @ptrCast(@alignCast(mem_op.?));
     const sem_lock: ?*std.c.sem_t = std.c.sem_open(
         common.sem_name,
         common.CREAT,
@@ -87,7 +106,7 @@ export fn setup(root_dir: [*:0]const u8) c_int {
     );
     if (sem_lock == null) {
         log_to_file("sem_open failed. code({})\n", .{std.posix.errno(-1)});
-        return -6;
+        return -7;
     }
     mem.length = 0;
     mem.is_playing = false;
@@ -100,6 +119,10 @@ export fn setup(root_dir: [*:0]const u8) c_int {
     return 0;
 }
 
+/// Play the given audio file.
+///
+/// @param file_name The audio filename.
+/// @return 0 for success, Less than 0 for failure.
 export fn play(file_name: [*:0]const u8) c_int {
     if (state.proc) |*proc| {
         stop();
@@ -123,6 +146,9 @@ export fn play(file_name: [*:0]const u8) c_int {
     return 0;
 }
 
+/// Set the volume of the player.
+///
+/// @param vol The volume. Value must be between 0 - 1.
 export fn set_volume(vol: f32) void {
     if (state.proc == null) {
         return;
@@ -134,6 +160,8 @@ export fn set_volume(vol: f32) void {
         }
     }
 }
+
+/// Pause the player.
 export fn pause() void {
     if (state.proc == null) {
         return;
@@ -145,6 +173,8 @@ export fn pause() void {
         }
     }
 }
+
+/// Resume the player.
 export fn @"resume"() void {
     if (state.proc == null) {
         return;
@@ -156,6 +186,9 @@ export fn @"resume"() void {
         }
     }
 }
+
+/// Stop the player.
+/// This function will clear the song from the player.
 export fn stop() void {
     if (state.proc == null) {
         return;
@@ -167,7 +200,9 @@ export fn stop() void {
         }
     }
 }
-export fn get_playtime() u64 {
+
+/// Get the current playtime of the running audio in seconds.
+export fn get_playtime() f64 {
     if (state.proc == null) {
         return 0;
     }
@@ -176,6 +211,8 @@ export fn get_playtime() u64 {
     }
     return 0;
 }
+
+/// Get the total audio length in seconds.
 export fn get_audio_length() u64 {
     if (state.proc == null) {
         return 0;
@@ -185,6 +222,10 @@ export fn get_audio_length() u64 {
     }
     return 0;
 }
+
+/// Get the is-playing flag.
+///
+/// @return 1 for true, 0 for false.
 export fn is_playing() c_int {
     if (state.proc == null) {
         return 0;
@@ -194,6 +235,12 @@ export fn is_playing() c_int {
     }
     return 0;
 }
+
+/// Get the in-progress flag.
+/// This function is to check if the player has an audio file queued up
+/// whether it's playing or paused.
+///
+/// @return 1 for true, 0 for false.
 export fn in_progress() c_int {
     if (state.proc == null) {
         return 0;
@@ -206,6 +253,7 @@ export fn in_progress() c_int {
     return 0;
 }
 
+/// Deinitialize the player plugin.
 export fn deinit() void {
     alloc.free(state.log_file_name);
     alloc.free(state.exe_path);

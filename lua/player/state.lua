@@ -6,7 +6,7 @@ local dirname = string.sub(debug.getinfo(1).source, 2, string.len('/state.lua') 
 
 local M = {
   _song = nil,
-  _volume = 100,
+  _volume = 75,
   _started = nil,
   opts = {
     parent_dir = vim.env.HOME,
@@ -79,10 +79,17 @@ function M.audio_length()
   return tonumber(player.get_audio_length())
 end
 
+-- Get the is-playing flag.
+--
+-- @return 1 for true, 0 for false.
 function M.is_playing()
   return player.is_playing()
 end
 
+-- Flag of in progress.
+-- This flag is to tell if a song is loaded whether it is paused or playing.
+--
+-- @return 1 for true, 0 for false.
 function M.in_progress()
   return player.in_progress()
 end
@@ -92,6 +99,16 @@ function M.get_playtime()
   return tonumber(player.get_playtime())
 end
 
+-- Get the current player info.
+--
+-- @return A table of player info.
+--    {
+--      song: String         - The song name.
+--      volume: Number       - The volume of the player.
+--      is_playing: Number   - The playing state. 1 for true, 0 for false.
+--      playtime: Number     - The current playtime.
+--      audio_length: Number - The full length of the audio.
+--    }
 function M.get_player_info()
   if M.in_progress() == 0 then
     return nil
@@ -115,6 +132,7 @@ function M.resume()
   player.resume()
 end
 
+-- Stop the player.
 function M.stop()
   player.stop()
 end

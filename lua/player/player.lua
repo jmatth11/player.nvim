@@ -6,7 +6,7 @@ int play(const char *file_name);
 int is_playing();
 int in_progress();
 void set_volume(float vol);
-long int get_playtime();
+double get_playtime();
 long int get_audio_length();
 void pause();
 void resume();

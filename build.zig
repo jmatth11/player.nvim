@@ -20,6 +20,7 @@ fn build_audio_lib(b: *std.Build, target: std.Build.ResolvedTarget, optimize: st
         .language = .c,
         .flags = flags,
     });
+    // required system libraries for miniaudio
     audio_mod.linkSystemLibrary("m", .{ .needed = true });
     audio_mod.linkSystemLibrary("pthread", .{ .needed = true });
     audio_mod.linkSystemLibrary("atomic", .{ .needed = true });
@@ -52,6 +53,7 @@ pub fn build(b: *std.Build) void {
     lib.linkLibrary(audio_lib);
     b.installArtifact(lib);
 
+    // construct lua plugin.
     const lua_mod = b.addModule("player_nvim", .{
         .root_source_file = b.path("src/lua.zig"),
         .target = target,
@@ -69,6 +71,7 @@ pub fn build(b: *std.Build) void {
     lua_lib.linkLibrary(audio_lib);
     b.installArtifact(lua_lib);
 
+    // create player_cli executable.
     const exe_mod = b.createModule(.{
         .target = target,
         .optimize = optimize,

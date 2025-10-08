@@ -1,5 +1,6 @@
 local M = {}
 
+-- Get the native separator for file paths.
 local function native_separator()
     if vim.fn.has("win32") == 1 or vim.fn.has("win32unix") == 1 then
         return "\\"

@@ -12,7 +12,7 @@ struct player_t;
 /**
  * Callback function typedef for when playback ends.
  */
-typedef void(*playback_cb)(uint64_t frameCount, bool ended);
+typedef void(*playback_cb)(double elapsed_time, bool ended);
 
 /**
  * Create a player.
