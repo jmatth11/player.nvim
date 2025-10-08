@@ -15,6 +15,10 @@ local height = 40
 -- Grab the selected file and play the song.
 function M.select_file()
   local idx = vim.fn.line(".")
+  -- first entry is instructions
+  if idx == 1 then
+    return
+  end
   if M.options ~= nil then
     local info = M.options[idx]
     require("player").play(info.full_path)
@@ -34,6 +38,9 @@ function M.format_contents(dir, recursive)
     table.insert(content, utils.get_center_padding(error_text, width, " ") .. error_text)
     return content
   end
+
+  local instruction_text = "<ENTER> to play file"
+  table.insert(content, utils.get_center_padding(instruction_text, width, " ") .. instruction_text)
 
   for _, file in ipairs(files) do
     local info = {

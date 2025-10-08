@@ -34,6 +34,9 @@ Setup options:
   -- Flag to redraw the player info window every second when it's open.
   -- Default is true.
   live_update = true,
+  -- Search for songs in the parent directory recursively.
+  -- Default is false.
+  recursive = false,
 }
 ```
 
@@ -52,11 +55,24 @@ vim.keymap.set(
     ":lua require('player').player_info()<CR>",
     {noremap = true},
 )
+-- <leader>pf to toggle the file select window.
+vim.keymap.set(
+    "n",
+    "<leader>pf",
+    ":lua require('player').file_select()<CR>",
+    {noremap = true},
+)
 ```
 
-Using the player info window is the recommended way to interact with this
-plugin. It displays the keybindings to pause/resume the song and to increase or
-lower the volume.
+Using the player info window or the file select window is the recommended way
+to interact with this plugin. These windows display their respective
+key-bindings to perform tasks.
+
+The player info window allows you to control the pause/resume/stop action of
+the song as well as increasing or lowering the volume.
+
+The file select window displays all the songs from your parent directory and allows
+you press `<ENTER>` to start playing a song from the list.
 
 ### Manual Controls
 
@@ -83,11 +99,21 @@ require('player').volume_up()
 require('player').volume_down()
 ```
 
-!! TODO finish once I have file selection implemented. !!
+Open control windows.
+
+```lua
+-- The player info on the currently playing song.
+require('player').player_info()
+-- The file selection window of the music within your parent directory.
+require('player').file_select()
+```
 
 ## Screenshots
 
+!! TODO update screenshot with new layout. !!
 ![player info window](references/player-info.png "Player Info Window")
+
+!! TODO add screenshot of file selection. !!
 
 ## Demo
 
