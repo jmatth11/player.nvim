@@ -2,6 +2,11 @@
 
 Simple plugin to play local audio files through neovim.
 
+## Dependencies
+
+- [Zig](https://github.com/ziglang/zig) - for the build system.
+- [`nvim-lua/plenary.nvim`](https://github.com/nvim-lua/plenary.nvim) - for window management.
+
 ## Configure
 
 Lazy.nvim
@@ -11,6 +16,9 @@ Lazy.nvim
   build = "zig build",
   -- Required to properly setup the player.
   config = true,
+  dependencies = {
+    "nvim-lua/plenary.nvim", -- required for window management
+  },
 ```
 
 Setup options:
