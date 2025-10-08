@@ -116,7 +116,7 @@ end
 -- @param contents The table of text to populate.
 -- @param flag The flag for is_playing.
 function M.get_play_state(contents, flag)
-  local play_button = "▶️"
+  local play_button = "▶"
   local status_text = "'<ENTER>' to play"
   if flag ~= 0 then
     play_button = "⏸"
