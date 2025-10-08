@@ -1,13 +1,16 @@
 local state = require("player.state")
 local utils = require("player.utils")
-local ui = require("player.ui")
+local info_ui = require("player.info_ui")
+local file_ui = require("player.file_ui")
+
 -- defaults
 local M = {
   opts = {
     parent_dir = vim.env.HOME,
     volume_scale = 5,
     live_update = true,
-  }
+  },
+  is_setup = false
 }
 
 -- autogroup
@@ -32,11 +35,19 @@ function M.setup(opts)
   if result ~= 0 then
     utils.error("player setup failed: code(" .. result .. ")")
   end
+  M.is_setup = true
 end
 
 -- Toggle the player info window.
 function M.player_info()
-  ui.toggle_window(state)
+  -- TODO maybe put the close logic in the toggle functions themselves
+  file_ui.close()
+  info_ui.toggle_window(state)
+end
+
+function M.file_select()
+  info_ui.close()
+  file_ui.toggle_window(M.opts)
 end
 
 -- Print the version of the plugin.
@@ -51,6 +62,9 @@ end
 --
 -- @param name The song file name.
 function M.play(name)
+  if not M.is_setup then
+    M.setup()
+  end
   state.play(name)
 end
 
@@ -62,7 +76,7 @@ end
 -- Set the volume of the player.
 function M.set_volume(vol)
   state.volume(vol)
-  ui.draw_player(state.get_player_info())
+  info_ui.draw_player(state.get_player_info())
 end
 
 -- Increase the volume of the player by the configured volume_scale value.
@@ -104,26 +118,26 @@ end
 -- Pause the player.
 function M.pause()
   state.pause()
-  ui.draw_player(state.get_player_info())
+  info_ui.draw_player(state.get_player_info())
 end
 
 -- Resume the player.
 function M.resume()
   state.resume()
-  ui.draw_player(state.get_player_info())
+  info_ui.draw_player(state.get_player_info())
 end
 
 -- Stop the player.
 -- This function clears out the song.
 function M.stop()
   state.stop()
-  ui.close()
+  info_ui.close()
 end
 
 -- Kill the current player process.
 function M.kill()
   state.kill()
-  ui.close()
+  info_ui.close()
 end
 
 return M

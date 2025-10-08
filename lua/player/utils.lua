@@ -82,6 +82,43 @@ function M.get_files(dir)
       end
     end
   end
+  return result
+end
+
+-- Safe gaurd against divide by zero
+function M.safe_divide(value, div)
+  if value >= 1 then
+    return value / div
+  end
+  return 0
+end
+
+-- Convert time elapsed into useful time info.
+-- @params Time elapsed in seconds
+-- @returns Table
+--      {
+--          sec,
+--          min,
+--          hr,
+--          day,
+--          week,
+--          yr
+--      }
+function M.extract_time_info(t)
+  local sec = t
+  local min = M.safe_divide(sec, 60)
+  local hr = M.safe_divide(min, 60)
+  local day = M.safe_divide(hr, 24)
+  local week = M.safe_divide(day, 7)
+  local yr = M.safe_divide(week, 52)
+  return {
+    sec = sec,
+    min = min,
+    hr = hr,
+    day = day,
+    week = week,
+    yr = yr,
+  }
 end
 
 return M
