@@ -28,9 +28,8 @@ function M.format_contents(dir, recursive)
   -- TODO maybe categorize songs in nice format?
   local files = utils.get_files(dir, recursive)
 
-  local files_len = #files
   local error_text = "--- No Audio Files Found ---"
-  if files_len == 0 then
+  if vim.tbl_isempty(files) then
     table.insert(content, " ")
     table.insert(content, utils.get_center_padding(error_text, width, " ") .. error_text)
     return content

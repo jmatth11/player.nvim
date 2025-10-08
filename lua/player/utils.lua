@@ -1,4 +1,4 @@
-local str = require("player.str")
+local str_utils = require("player.str")
 local M = {}
 
 -- Log and notify the given message at INFO level.
@@ -62,38 +62,43 @@ end
 
 -- Check for audio file endings we support.
 local function file_endings(val)
-  return M.ends_with(val, ".mp3") or M.ends_with(val, ".wav") or M.ends_with(val, ".flac")
+  local normalized_val = string.lower(val)
+  return M.ends_with(normalized_val, ".mp3") or M.ends_with(normalized_val, ".wav") or M.ends_with(normalized_val, ".flac")
 end
 
 -- Get the list of audio files in a directory.
 --
 -- @param dir The directory to search for audio files.
 -- @param recursive Flag to search recursively.
--- @param prev_path This should always be null from the caller. This is for internal state.
 -- @return List of audio files within a directory.
-function M.get_files(dir, recursive, prev_path)
+function M.get_files(dir, recursive)
+  if dir == nil then
+    return {}
+  end
   local files = vim.fn.readdir(dir)
   local result = {}
   if files then
     for _, file in ipairs(files) do
+      local full_path = str_utils.path_join(dir, file)
+      if full_path == nil then
+        goto continue
+      end
       -- recursive path
-      if recursive and vim.fn.isdirectory(file) then
-        local full_path = str.path_join(dir, file)
-        if prev_path ~= nil then
-          full_path = str.path_join(prev_path, file)
-        end
+      if recursive and vim.fn.isdirectory(full_path) == 1 then
         -- add all inner files to list
-        local inner_files = M.get_files(file, recursive, full_path)
+        local inner_files = M.get_files(full_path, recursive)
         for _, entry in ipairs(inner_files) do
           -- TODO maybe consider categorizing inner files to better group songs?
           if file_endings(entry) then
-            table.insert(result, entry)
+            table.insert(result, str_utils.path_join(full_path, entry))
           end
         end
       end
       if file_endings(file) then
         table.insert(result, file)
       end
+      -- label to skip invalid file paths
+      ::continue::
     end
   end
   return result
