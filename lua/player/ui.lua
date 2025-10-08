@@ -177,7 +177,17 @@ function M.draw_player(info)
     if contents == nil then
       contents = {}
     end
+    vim.api.nvim_set_option_value(
+      "readonly",
+      false,
+      { buf = tracker_bufnr }
+    )
     vim.api.nvim_buf_set_lines(tracker_bufnr, 0, #contents, false, contents)
+    vim.api.nvim_set_option_value(
+      "readonly",
+      true,
+      { buf = tracker_bufnr }
+    )
   end
 end
 
