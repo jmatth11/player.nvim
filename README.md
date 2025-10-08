@@ -116,7 +116,7 @@ require('player').file_select()
 
 ## Demo
 
-!! TODO add demo when file selection is implemented. !!
+https://github.com/user-attachments/assets/5a35b49d-d420-4d13-be69-13637d7cc59b
 
 ## Known issues
 
