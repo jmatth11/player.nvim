@@ -53,7 +53,11 @@ end
 -- If param is nil, return the song name.
 function M.song(name)
   if name ~= nil then
-    local file_name = str.path_join(M.opts.parent_dir, name)
+    local file_name = name
+    local already_full_path = string.find(name, M.opts.parent_dir, 1, true)
+    if not already_full_path then
+      file_name = str.path_join(M.opts.parent_dir, name)
+    end
     if file_name ~= nil then
       M._song = file_name
     end

@@ -20,7 +20,8 @@ function M.select_file()
     return
   end
   if M.options ~= nil then
-    local info = M.options[idx]
+    -- minus 1 to account for the offset with the instructions
+    local info = M.options[idx - 1]
     require("player").play(info.full_path)
   end
 end
