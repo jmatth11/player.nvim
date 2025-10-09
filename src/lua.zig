@@ -133,14 +133,16 @@ export fn play(file_name: [*:0]const u8) c_int {
         std.mem.span(file_name),
         state.log_file_name,
     };
-    state.mem.?.is_playing = true;
-    state.mem.?.should_stop = false;
-    state.proc = std.process.Child.init(args, alloc);
-    state.proc.?.spawn() catch |err| {
-        log_to_file("spawn failed: {any}\n", .{err});
-        state.mem.?.is_playing = false;
-        return -1;
-    };
+    if (state.mem) |mem| {
+        mem.is_playing = true;
+        mem.should_stop = false;
+        state.proc = std.process.Child.init(args, alloc);
+        state.proc.?.spawn() catch |err| {
+            log_to_file("spawn failed: {any}\n", .{err});
+            mem.is_playing = false;
+            return -1;
+        };
+    }
     return 0;
 }
 
