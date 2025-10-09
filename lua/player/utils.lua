@@ -131,7 +131,7 @@ function M.extract_time_info(t)
   local week = M.safe_divide(day, 7)
   local yr = M.safe_divide(week, 52)
   return {
-    sec = sec,
+    sec = sec % 60,
     min = min,
     hr = hr,
     day = day,
