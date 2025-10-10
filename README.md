@@ -1,11 +1,32 @@
 # Player.nvim
 
-Simple plugin to play local audio files through neovim.
+Simple plugin to play local audio files through neovim. (currently only tested on linux-like environments)
 
 ## Dependencies
 
-- [Zig](https://github.com/ziglang/zig) - for the build system.
+- [Zig](https://github.com/ziglang/zig) - for the build system. (v0.15.1)
 - [`nvim-lua/plenary.nvim`](https://github.com/nvim-lua/plenary.nvim) - for window management.
+
+### Installing Zig Dependency
+
+Their [install page](https://github.com/ziglang/zig/wiki/Install-Zig-from-a-Package-Manager) with various package managers.
+
+Quick ref for linux and macos:
+
+Linux (apt-based):
+
+```bash
+# ensure snap is installed
+sudo apt install -y snapd
+sudo snap install zig --classic --beta
+```
+
+MacOS:
+
+```bash
+brew install zig
+```
+
 
 ## Configure
 
