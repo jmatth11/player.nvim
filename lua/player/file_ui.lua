@@ -64,7 +64,6 @@ function M.close()
   end
 end
 
--- TODO Maybe add search feature in case of a lot of songs?
 -- Toggle the player file select window on or off.
 function M.toggle_window(opts)
   if tracker_win_id ~= nil then
@@ -72,6 +71,10 @@ function M.toggle_window(opts)
     tracker_win_id = nil
     tracker_bufnr = nil
     return
+  end
+  local win_height = vim.api.nvim_get_option_value("lines", {})
+  if (height > win_height) then
+    height = win_height
   end
   local window = ui.create_window("File Select", "player_file_viewer.nvim.window", width, height, 1)
   local contents = M.format_contents(opts.parent_dir, opts.recursive)

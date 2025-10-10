@@ -121,5 +121,6 @@ pub export fn deinit() void {
 /// Get the version number.
 pub export fn version() [*:0]const u8 {
     // push string to be a return value
+    // TODO need to pull from build instead of hardcoded
     return "0.0.1";
 }
