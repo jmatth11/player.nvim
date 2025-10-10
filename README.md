@@ -34,7 +34,7 @@ Lazy.nvim
 ```lua
   'jmatth11/player.nvim',
   -- requires zig to build the plugin
-  build = "zig build",
+  build = "zig build -Doptimize=ReleaseSafe",
   -- Required to properly setup the player.
   config = true,
   dependencies = {
