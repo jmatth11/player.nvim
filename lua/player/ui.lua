@@ -16,6 +16,8 @@ function M.create_window(title, namespace, width, height, padding)
     col = vim.o.columns - width - padding,
     minwidth = width,
     minheight = height,
+    width = width,
+    height = height,
     borderchars = border_chars,
   })
   vim.api.nvim_set_option_value(

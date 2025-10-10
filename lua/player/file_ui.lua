@@ -10,7 +10,7 @@ local M = {
 local tracker_win_id = nil
 local tracker_bufnr = nil
 local width = 50
-local height = 40
+local height = 50
 
 -- Grab the selected file and play the song.
 function M.select_file()
@@ -72,7 +72,7 @@ function M.toggle_window(opts)
     tracker_bufnr = nil
     return
   end
-  local win_height = vim.api.nvim_get_option_value("lines", {})
+  local win_height = vim.api.nvim_get_option_value("lines", {}) - 5
   if (height > win_height) then
     height = win_height
   end
