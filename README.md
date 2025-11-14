@@ -20,7 +20,7 @@ After the build, the temporary Zig executable will be removed.
 Lazy.nvim
 ```lua
   'jmatth11/player.nvim',
-  -- requires zig to build the plugin
+  -- build script may take a some time if you don't already have zig on your system
   build = "./build.sh",
   -- Required to properly setup the player.
   config = true,
