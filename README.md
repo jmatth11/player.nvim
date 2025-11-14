@@ -2,18 +2,46 @@
 
 Simple plugin to play local audio files through neovim. (currently only tested on linux-like environments)
 
+## Contents
+
+- [Dependencies](#dependencies)
+    - [Build Dependencies](#build-dependencies)
+- [Building](#building)
+- [Configure](#configure)
+- [Usage](#usage)
+    - [Recommended Mappings](#recommended-mappings)
+    - [Manual Controls](#manual-controls)
+- [Screenshots](#screenshots)
+- [Demo](#demo)
+- [Known Issues](#known-issues)
+
 ## Dependencies
 
 - [`nvim-lua/plenary.nvim`](https://github.com/nvim-lua/plenary.nvim) - for window management.
 
-### Building
+### Build Dependencies:
+
+This project requires either option A or option B dependencies to be installed
+on the user's system to build the project.
+
+Option A:
+- [Zig](https://github.com/ziglang/zig) v0.15.2
+
+Option B:
+- [Curl](https://github.com/curl/curl)
+- [Tar](https://www.gnu.org/software/tar/)
+
+## Building
 
 This project uses [Zig](https://github.com/ziglang/zig) but you don't need to
 have Zig installed to build.
 
-Use the `build.sh` script to build the project. This script will install
-Zig temporarily if it does not already exist on the system to build the project.
-After the build, the temporary Zig executable will be removed.
+Use the `build.sh` script to build the project.
+
+This script will check if Zig already exists on the system. If Zig does not exist
+or if the system Zig is the wrong version, the script will download the correct
+Zig executable temporarily to build. Once the build is complete, the
+temporary Zig executable will be removed.
 
 ## Configure
 
